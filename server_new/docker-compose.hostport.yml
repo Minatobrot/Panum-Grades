@@ -1,0 +1,8 @@
+# Nur falls Caddy den Container nicht über ein Docker-Netzwerk erreicht:
+# bindet den Dienst zusätzlich an 127.0.0.1:HOST_PORT auf dem Host.
+# Start: docker compose -f docker-compose.yml -f docker-compose.hostport.yml up -d
+
+services:
+  calendar:
+    ports:
+      - "127.0.0.1:${HOST_PORT}:${APP_PORT}"

@@ -1,0 +1,11 @@
+{
+  "name": "panum-class-calendar-server",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Server für den Klassenkalender der Panum-Grades-Extension",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test --test-force-exit \"test/*.test.js\""
+  }
+}

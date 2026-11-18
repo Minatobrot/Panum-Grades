@@ -1,0 +1,24 @@
+# Start: cp .env.example .env, Werte setzen, dann: docker compose up -d
+# Es wird kein Port nach aussen veröffentlicht. Caddy erreicht den Dienst über das gemeinsame Docker-Netzwerk.
+
+services:
+  calendar:
+    build: .
+    container_name: ${CONTAINER_NAME}
+    restart: unless-stopped
+    environment:
+      APP_PORT: ${APP_PORT}
+      PUBLIC_URL: ${PUBLIC_URL}
+      SERVER_SECRET: ${SERVER_SECRET}
+      TRUST_PROXY: ${TRUST_PROXY}
+    expose:
+      - "${APP_PORT}"
+    volumes:
+      - ./data:/data
+    networks:
+      - caddy
+
+networks:
+  caddy:
+    external: true
+    name: ${CADDY_NETWORK}

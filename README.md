@@ -41,6 +41,10 @@
 2. **Chrome/Edge:** `chrome://extensions` → Entwicklermodus → „Entpackte Erweiterung laden“ → Ordner wählen.
 3. **Firefox:** `about:debugging` → „Dieser Firefox“ → „Temporäres Add-on laden“ → `manifest.json` wählen.
 
+## 🗓️ Server für den Klassenkalender
+
+Der Server liegt in [`server_new/`](server_new/), die API ist in [`SERVER_SPEC.md`](SERVER_SPEC.md) beschrieben. Node 24 ohne npm-Pakete, SQLite, ein Docker-Container. Namen werden nur als Hash gespeichert (Client: SHA-256, Server: HMAC mit `SERVER_SECRET`), Noten gibt es auf dem Server nicht. Er liefert auch die Handy-Ansicht (`server_new/public/`) aus. Einrichtung: siehe [`server_new/README.md`](server_new/README.md).
+
 ---
 
 ## 🛠️ Projektbetreuer & Mitwirkende
