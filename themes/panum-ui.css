@@ -1,0 +1,478 @@
+/* Oberfläche von Panum Grades auf der Schulnetz-Seite: Buttons, Panels, Pluspunkte in der Tabelle, Dialoge.
+   Hell ist der Normalfall, dunkel gilt unter html.panum-dark-theme (gleiche Farben wie dark-theme.css).
+
+   Das Dark Theme färbt fast jedes Element der Seite mit !important um. Darum:
+   - alles Eigene liegt in einem Element mit der Klasse .pg
+   - Farben stehen hier ebenfalls mit !important und mit "html:root .pg" davor, damit sie gewinnen */
+
+:root {
+  --pg-surface: #ffffff;
+  --pg-card: #f8f9fa;
+  --pg-field: #ffffff;
+  --pg-hover: #f1f3f5;
+  --pg-border: #e3e6ea;
+  --pg-text: #343a40;
+  --pg-muted: #6c757d;
+  --pg-off: #c5cbd3;
+  --pg-primary: #1976d2;
+  --pg-primary-text: #1565c0;
+  --pg-pos: #2e7d32;
+  --pg-pos-bg: #e8f5e9;
+  --pg-neg: #c62828;
+  --pg-neg-bg: #fdecea;
+  --pg-warn: #b25e00;
+  --pg-warn-bg: #fff4e0;
+  --pg-zero: #5f6b7a;
+  --pg-zero-bg: #eef1f4;
+  --pg-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  --pg-shadow-big: 0 10px 34px rgba(0, 0, 0, 0.2);
+}
+
+html.panum-dark-theme {
+  --pg-surface: #151d28;
+  --pg-card: #1a202b;
+  --pg-field: #111722;
+  --pg-hover: #222b37;
+  --pg-border: #303a4b;
+  --pg-text: #e8edf5;
+  --pg-muted: #b5bfce;
+  --pg-off: #4a5568;
+  --pg-primary: #2d6cb5;
+  --pg-primary-text: #7cc0ff;
+  --pg-pos: #8fdda3;
+  --pg-pos-bg: rgba(46, 125, 50, 0.26);
+  --pg-neg: #ffabab;
+  --pg-neg-bg: rgba(198, 40, 40, 0.24);
+  --pg-warn: #ffd39a;
+  --pg-warn-bg: rgba(239, 108, 0, 0.22);
+  --pg-zero: #b5bfce;
+  --pg-zero-bg: rgba(181, 191, 206, 0.14);
+  --pg-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --pg-shadow-big: 0 12px 38px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Schwebende Buttons ---------- */
+
+.panum-dock-btn {
+  position: fixed;
+  /* über allem, was die Seite selbst einblendet: nichts darf die Buttons verdecken */
+  z-index: 2147483000;
+  width: 50px;
+  height: 50px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid var(--panum-accent, #607d8b);
+  border-radius: 10px;
+  box-shadow: var(--pg-shadow);
+  cursor: pointer;
+  outline: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Grösse ändert sich nie: gedrückt und offen werden über Schatten und Ring gezeigt, nichts verschiebt sich */
+  transition: right 0.2s ease, bottom 0.2s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.panum-dock-btn svg { display: block; pointer-events: none; }
+.panum-dock-btn:hover { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24); }
+.panum-dock-btn:active { transform: scale(0.94); }
+.panum-dock-btn:focus-visible { box-shadow: 0 0 0 3px var(--pg-surface), 0 0 0 5px var(--panum-accent, #607d8b); }
+.panum-dock-btn.is-open { box-shadow: 0 0 0 2px var(--panum-accent, #607d8b), var(--pg-shadow); }
+
+html.panum-dark-theme .panum-dock-btn { background-color: var(--panum-bg-soft) !important; }
+
+/* ---------- Panels ---------- */
+
+.panum-dock-panel {
+  position: fixed;
+  z-index: 2147482990;
+  right: var(--panum-dock-right, 80px);
+  bottom: var(--panum-dock-bottom, 80px);
+  width: min(var(--panum-panel-width, 420px), calc(100vw - var(--panum-dock-right, 80px) - 16px));
+  height: min(var(--panum-panel-height, 480px), calc(100vh - var(--panum-dock-bottom, 80px) - 16px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--pg-shadow-big);
+  transform-origin: bottom right;
+  animation: panum-panel-in 0.14s ease-out;
+}
+
+html.panum-dark-theme .panum-dock-panel { background: #151d28 !important; }
+
+@keyframes panum-panel-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+}
+
+@keyframes panum-fade-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panum-dock-btn, .panum-dock-panel, .pg-modal-overlay, .pg-modal { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Grundlage für alles in .pg ---------- */
+
+html:root .pg {
+  color: var(--pg-text) !important;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+html:root .pg * { color: inherit !important; box-sizing: border-box; }
+html:root .pg .pg-muted { color: var(--pg-muted) !important; }
+.pg .pg-strong { font-weight: 600; }
+.pg .pg-grow { flex: 1; min-width: 0; }
+.pg .pg-spacer { flex: 1; }
+.pg p { margin: 0 0 8px; }
+
+html:root .pg .pg-label {
+  margin: 16px 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pg-muted) !important;
+}
+
+.pg .pg-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+
+html:root .pg .pg-card {
+  padding: 10px 12px;
+  background: var(--pg-card) !important;
+  border: 1px solid var(--pg-border) !important;
+  border-radius: 10px;
+}
+
+/* Knöpfe */
+html:root .pg .pg-btn {
+  margin: 0;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  text-transform: none;
+  color: var(--pg-text) !important;
+  background: var(--pg-surface) !important;
+  border: 1px solid var(--pg-border) !important;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+html:root .pg .pg-btn:hover { background: var(--pg-hover) !important; }
+html:root .pg .pg-btn:active { transform: scale(0.97); }
+html:root .pg .pg-btn:focus-visible { outline: 2px solid var(--pg-primary-text); outline-offset: 1px; }
+html:root .pg .pg-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+html:root .pg .pg-btn-primary { color: #fff !important; background: var(--pg-primary) !important; border-color: var(--pg-primary) !important; }
+html:root .pg .pg-btn-primary:hover { background: var(--pg-primary) !important; filter: brightness(1.08); }
+html:root .pg .pg-btn-quiet { color: var(--pg-primary-text) !important; background: transparent !important; }
+html:root .pg .pg-btn-danger { color: var(--pg-neg) !important; }
+html:root .pg .pg-btn-block { display: block; width: 100%; }
+
+html:root .pg .pg-icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--pg-muted) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: none;
+}
+html:root .pg .pg-icon-btn:hover { background: var(--pg-hover) !important; color: var(--pg-text) !important; }
+
+/* Eingaben */
+html:root .pg .pg-input {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--pg-text) !important;
+  background: var(--pg-field) !important;
+  border: 1px solid var(--pg-border) !important;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+html:root .pg .pg-input:focus { border-color: var(--pg-primary-text) !important; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.18); }
+html:root .pg .pg-input::placeholder { color: var(--pg-muted); opacity: 0.8; }
+html:root .pg .pg-input-small { width: 68px; text-align: center; flex: none; }
+
+/* Schalter */
+.pg .pg-switch { position: relative; display: inline-block; width: 26px; height: 14px; margin: 0; flex: none; cursor: pointer; vertical-align: middle; }
+.pg .pg-switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.pg .pg-switch-track { position: absolute; inset: 0; background: var(--pg-off); border-radius: 999px; transition: background 0.15s ease; pointer-events: none; }
+.pg .pg-switch-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; background: #fff; border-radius: 50%; transition: transform 0.15s ease; }
+.pg .pg-switch input:checked + .pg-switch-track { background: var(--pg-pos); }
+html.panum-dark-theme .pg .pg-switch input:checked + .pg-switch-track { background: #3f9b56; }
+.pg .pg-switch input:checked + .pg-switch-track::after { transform: translateX(12px); }
+.pg .pg-switch input:focus-visible + .pg-switch-track { box-shadow: 0 0 0 2px var(--pg-surface), 0 0 0 4px var(--pg-primary-text); }
+
+/* Punktewerte */
+html:root .pg .pg-badge {
+  display: inline-block;
+  min-width: 36px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  border-radius: 999px;
+  color: var(--pg-zero) !important;
+  background: var(--pg-zero-bg);
+}
+html:root .pg .is-pos { color: var(--pg-pos) !important; }
+html:root .pg .is-neg { color: var(--pg-neg) !important; }
+html:root .pg .is-warn { color: var(--pg-warn) !important; }
+html:root .pg .is-zero { color: var(--pg-zero) !important; }
+html:root .pg .pg-badge.is-pos { background: var(--pg-pos-bg); }
+html:root .pg .pg-badge.is-neg { background: var(--pg-neg-bg); }
+html:root .pg .pg-badge.is-off { color: var(--pg-muted) !important; background: transparent; opacity: 0.7; }
+
+/* ---------- Pluspunkte in der Notentabelle ---------- */
+
+/* Wert und Schalter stehen in einem festen Raster am rechten Rand der Schnitt-Zelle.
+   Waagrecht: fest am Zellenrand, darum stehen alle Schalter untereinander.
+   Senkrecht: "top: auto" lässt das Raster auf der Textzeile des Schnitts beginnen, und es ist genau eine
+   Zeile hoch (1lh, mit der Zeilenhöhe der Zelle). Der Inhalt ist darin mittig. So bleibt beides bei jedem
+   Zoom und jeder Schriftgrösse auf der Zeile, ohne feste Pixel-Korrektur. */
+html:root .pg.panum-pp {
+  position: absolute;
+  top: auto;
+  right: 10px;
+  /* inline, damit die Ausgangsposition auf der Textzeile liegt und nicht darunter */
+  display: inline-grid;
+  grid-template-columns: 48px 26px;
+  column-gap: 8px;
+  align-items: center;
+  line-height: inherit;
+  height: 14px;
+  height: 1lh;
+  margin: 0;
+  white-space: nowrap;
+}
+html:root td.panum-pp-cell { position: relative; padding-right: 104px !important; }
+html:root .pg.panum-pp .pg-badge { width: 100%; min-width: 0; padding: 0; line-height: 16px; }
+html:root .pg.panum-pp .pg-chip { grid-column: 1 / -1; max-width: 82px; justify-self: end; line-height: 14px; padding-top: 0; padding-bottom: 0; }
+.pg.panum-pp .pg-switch { justify-self: end; }
+
+html:root .pg .pg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 150px;
+  padding: 1px 8px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--pg-muted) !important;
+  border: 1px dashed var(--pg-border);
+  border-radius: 999px;
+}
+.pg .pg-chip span { overflow: hidden; text-overflow: ellipsis; }
+.pg svg { flex: none; }
+
+html:root .pg.panum-pp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: var(--pg-card) !important;
+  border: 1px solid var(--pg-border);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.pg .pg-stat { display: flex; align-items: baseline; gap: 8px; }
+html:root .pg .pg-stat-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--pg-muted) !important; }
+.pg .pg-stat-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+html:root .pg .pg-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 10px;
+  background: var(--pg-surface) !important;
+  border: 1px solid var(--pg-border);
+  border-radius: 999px;
+}
+.pg .pg-group-name { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+.pg .panum-pp-note { font-size: 12px; cursor: help; }
+
+/* ---------- Pluspunkte-Panel (Button) ----------
+   Das Panel sieht aus wie vor 3.1.0 und bringt seine hellen Farben als style-Attribute mit
+   (buttons/pluspoints-button.js). Hier steht nur, was im Dark Mode anders ist. */
+
+html.panum-dark-theme #pluspoints-overlay-panel,
+html.panum-dark-theme #pluspoints-overlay-panel * {
+  color: var(--panum-text, #e8edf5) !important;
+  border-color: var(--panum-border, #303a4b) !important;
+}
+html.panum-dark-theme #pluspoints-overlay-panel [style*="background: white"],
+html.panum-dark-theme #pluspoints-overlay-panel [style*="background: #fff"],
+html.panum-dark-theme #pluspoints-overlay-panel [style*="background: #f8f9fa"],
+html.panum-dark-theme #pluspoints-overlay-panel [style*="background:#f8f9fa"],
+html.panum-dark-theme #pluspoints-overlay-panel [style*="linear-gradient(135deg, #f8f9fa, #e9ecef)"] {
+  background: #1a202b !important;
+}
+html.panum-dark-theme #pluspoints-overlay-panel [style*="background: #f0f9ff"] { background: #192534 !important; }
+html.panum-dark-theme #pluspoints-overlay-panel td,
+html.panum-dark-theme #pluspoints-overlay-panel th { background: transparent !important; }
+html.panum-dark-theme #pluspoints-overlay-panel [style*="#495057"],
+html.panum-dark-theme #pluspoints-overlay-panel [style*="#6c757d"] { color: var(--panum-text-soft, #b5bfce) !important; }
+html.panum-dark-theme #pluspoints-overlay-panel [style*="color:#aaa"] { color: #7d8898 !important; }
+html.panum-dark-theme #pluspoints-overlay-panel [style*="color:#1976d2"] { color: #7cc0ff !important; }
+html.panum-dark-theme #pluspoints-overlay-panel [style*="color:#28a745"],
+html.panum-dark-theme #pluspoints-overlay-panel [style*="color:#388e3c"] { color: var(--panum-success, #8fdda3) !important; }
+html.panum-dark-theme #pluspoints-overlay-panel [style*="color:#dc3545"] { color: #ff9c9c !important; }
+html.panum-dark-theme #pluspoints-overlay-panel tfoot tr[style*="rgba(40,167,69"] td { background: rgba(46, 125, 50, 0.22) !important; }
+html.panum-dark-theme #pluspoints-overlay-panel tfoot tr[style*="rgba(220,53,69"] td { background: rgba(198, 40, 40, 0.22) !important; }
+html.panum-dark-theme #pluspoints-overlay-panel .pp-head,
+html.panum-dark-theme #pluspoints-overlay-panel .pp-head *,
+html.panum-dark-theme #pluspoints-overlay-panel #merge-btn { color: #fff !important; }
+html.panum-dark-theme #pluspoints-overlay-panel #merge-btn { filter: saturate(0.9) brightness(0.95); }
+html.panum-dark-theme #pluspoints-overlay-panel .pp-switch-track[style*="#ccc"] { background: #4a5568 !important; }
+
+/* Tutorial im Panel (Kopf und Tipp-Kasten wie bei den Achievements) */
+html.panum-dark-theme #pluspoints-overlay-panel .pp-tutorial-card { background: #151d28 !important; }
+html.panum-dark-theme #pluspoints-overlay-panel .pp-tutorial-head,
+html.panum-dark-theme #pluspoints-overlay-panel .pp-tutorial-head *,
+html.panum-dark-theme #pluspoints-overlay-panel #panum-pp-tutorial-inline { color: #fff !important; }
+html.panum-dark-theme #pluspoints-overlay-panel .pp-tutorial-tip { background: #2b2414 !important; border-left-color: #ffb300 !important; }
+html.panum-dark-theme #pluspoints-overlay-panel #panum-pp-tutorial-inline { border-color: #ffb300 !important; }
+html.panum-dark-theme #pluspoints-overlay-panel #panum-pp-tutorial-keep { background: transparent !important; color: #ffca55 !important; border-color: #ffb300 !important; }
+
+/* ---------- Dialoge (Fächer verbinden, Teilen) ---------- */
+
+html:root .pg.pg-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 20, 28, 0.45) !important;
+  animation: panum-fade-in 0.12s ease-out;
+}
+
+html:root .pg .pg-modal {
+  width: min(460px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 20px;
+  background: var(--pg-surface) !important;
+  border: 1px solid var(--pg-border);
+  border-radius: 14px;
+  box-shadow: var(--pg-shadow-big);
+  animation: panum-panel-in 0.14s ease-out;
+}
+.pg .pg-modal-narrow { width: min(340px, 100%); }
+.pg .pg-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.pg .pg-modal-title { font-size: 17px; font-weight: 700; }
+.pg .pg-modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+html:root .pg .pg-error { min-height: 18px; margin-top: 8px; font-size: 13px; color: var(--pg-neg) !important; }
+
+.pg .pg-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+html:root .pg .pg-pick {
+  margin: 0;
+  padding: 5px 11px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--pg-text) !important;
+  background: var(--pg-surface) !important;
+  border: 1px solid var(--pg-border) !important;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+html:root .pg .pg-pick:hover { background: var(--pg-hover) !important; }
+html:root .pg .pg-pick.is-on { color: var(--pg-pos) !important; background: var(--pg-pos-bg) !important; border-color: var(--pg-pos) !important; font-weight: 600; }
+html:root .pg .pg-pick:disabled { opacity: 0.45; cursor: default; }
+
+/* Liste im Teilen-Dialog */
+.pg .pg-options { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+html:root .pg .pg-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  text-decoration: none;
+  color: var(--pg-text) !important;
+  background: var(--pg-card) !important;
+  border: 1px solid var(--pg-border) !important;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+html:root .pg .pg-option:hover { background: var(--pg-hover) !important; }
+.pg .pg-option svg { width: 18px; height: 18px; }
+
+/* ---------- Panel-Inhalt (Notenrechner) ---------- */
+
+html:root .pg .pg-panel-head {
+  position: relative;
+  flex: none;
+  padding: 18px 60px 14px 18px;
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--pg-head-a, #1976d2), var(--pg-head-b, #1565c0)) !important;
+}
+html:root .pg .pg-panel-title { font-size: 19px; font-weight: 700; margin-bottom: 4px; color: #fff !important; }
+html:root .pg .pg-panel-sub { font-size: 13px; opacity: 0.92; color: #fff !important; }
+html:root .pg .pg-panel-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: none !important;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+html:root .pg .pg-panel-close:hover { background: rgba(255, 255, 255, 0.34) !important; }
+html:root .pg .pg-panel-body { flex: 1; overflow-y: auto; padding: 4px 16px 16px; background: var(--pg-surface) !important; }
+
+.pg .pg-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: 13px; }
+.pg .pg-facts b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.pg .pg-grades { margin-top: 6px; font-size: 12px; }
+
+html:root .pg .pg-result {
+  margin-top: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  background: var(--pg-zero-bg) !important;
+  border-radius: 10px;
+}
+html:root .pg .pg-result.is-pos { background: var(--pg-pos-bg) !important; }
+html:root .pg .pg-result.is-neg { background: var(--pg-neg-bg) !important; }
+html:root .pg .pg-result.is-warn { background: var(--pg-warn-bg) !important; }
+.pg .pg-result-big { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 6px; }
+.pg .pg-result:empty { display: none; }

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <title>Prüfungen</title>
+    <link rel="stylesheet" href="../classCalendar/calendar.css">
+    <link rel="stylesheet" href="exams.css">
+  </head>
+  <body>
+    <header class="head">
+      <div class="head-title">Prüfungen</div>
+      <div class="head-sub" id="head-sub">Aus dem Schulnetz in den Klassenkalender übernehmen</div>
+      <button class="head-close" id="close" title="Schliessen" aria-label="Schliessen">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M13 1L1 13M1 1L13 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <main>
+      <div class="card share-banner" id="share-banner">
+        <div class="share-banner-title" id="share-banner-title">So funktioniert es</div>
+        <div id="share-banner-text">Unten stehen deine Prüfungen aus dem Schulnetz. «Übernehmen» trägt eine Prüfung in den Klassenkalender ein.</div>
+      </div>
+
+      <div class="card toolbar">
+        <div class="hint" id="status">Prüfungsplan wird geladen …</div>
+        <div class="actions">
+          <button class="btn" id="export" title="Alle angezeigten Prüfungen als .ics-Datei speichern" disabled>.ics</button>
+          <button class="btn primary" id="take-all" disabled>Alle übernehmen</button>
+        </div>
+      </div>
+
+      <div id="list"></div>
+
+      <div class="foot">
+        <span>Ohne Klick wird nichts übernommen und nichts geteilt.</span>
+      </div>
+    </main>
+
+    <script src="../../browser-polyfill.min.js"></script>
+    <script src="../config.js"></script>
+    <script src="../classCalendar/db.js"></script>
+    <script src="../classCalendar/scope.js"></script>
+    <script src="../tour.js"></script>
+    <script src="../classCalendar/ics.js"></script>
+    <script src="../classCalendar/sync.js"></script>
+    <script src="exams.js"></script>
+  </body>
+</html>

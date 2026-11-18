@@ -468,9 +468,7 @@
 
   function createFallbackButtons() {
     const buttonsMK = [
-      { id: 'pluspoints-overlay-btn', title: '+Punkte', color: '#388e3c', icon: '➕', position: { rightOffset: 20, bottomOffset: 140 } },
       { id: 'notenrechner-calc-btn', title: 'Notenrechner', color: '#1976d2', icon: '🧮', position: { rightOffset: 80, bottomOffset: 20 } },
-      { id: 'notenrechner-custom-btn', title: 'Eigene Noten', color: '#b36a00', icon: '✏️', position: { rightOffset: 140, bottomOffset: 20 } },
       { id: 'improvement-overlay-btn', title: 'Chancen & Risiken', color: '#ff5722', icon: '📈', position: { rightOffset: 20, bottomOffset: 80 } }
     ];
     
@@ -989,7 +987,8 @@
         return;
       }
 
-      const expectedClassesMK = ['PluspointsButton', 'CalculatorButton', 'CustomButton', 'ImprovementButton', 'GamificationButton'];
+      // PanumDock (features/dock.js) stellt die Buttons auf, die Klassen liefern Inhalt und Panel
+      const expectedClassesMK = ['PanumDock', 'CalculatorButton', 'ImprovementButton', 'GamificationButton'];
       const missingClassesMK = expectedClassesMK.filter(className => !window[className]);
       
       if (missingClassesMK.length > 0) {
@@ -1004,111 +1003,48 @@
     });
   }
 
+  // Position, Ein/Aus und "nur ein Panel offen" regelt PanumDock. Hier werden die Buttons nur angemeldet.
+  // Die Pluspunkte stehen direkt in der Notentabelle (features/pluspoints/inline.js), der Notenrechner
+  // enthält auch die Probe-Noten: dafür gibt es keine eigenen Buttons mehr.
   function initializeButtonsDirectly() {
     buttonInstancesMK = {};
     window.buttonInstancesMK = buttonInstancesMK;
 
-    const constructorArgsMK = [buttonManager];
-    
-    try {
-      if (window.PluspointsButton) {
-        buttonInstancesMK.pluspoints = new window.PluspointsButton(...constructorArgsMK);
-        buttonInstancesMK.pluspoints.create();
-      } else {
-        console.warn('⚠ PluspointsButton class not available');
-      }
-    } catch (e) {
-      console.error('✗ Failed to create PluspointsButton:', e);
-    }
-    
-    try {
-      if (window.CalculatorButton) {
-        buttonInstancesMK.calculator = new window.CalculatorButton(...constructorArgsMK);
-        buttonInstancesMK.calculator.create();
-      } else {
-        console.warn('⚠ CalculatorButton class not available');
-      }
-    } catch (e) {
-      console.error('✗ Failed to create CalculatorButton:', e);
-    }
-    
-    try {
-      if (window.CustomButton) {
-        buttonInstancesMK.custom = new window.CustomButton(...constructorArgsMK);
-        buttonInstancesMK.custom.create();
-      } else {
-        console.warn('⚠ CustomButton class not available');
-      }
-    } catch (e) {
-      console.error('✗ Failed to create CustomButton:', e);
-    }
-    
-    try {
-      if (window.ImprovementButton) {
-        buttonInstancesMK.improvement = new window.ImprovementButton(...constructorArgsMK);
-        buttonInstancesMK.improvement.create();
-      } else {
-        console.warn('⚠ ImprovementButton class not available');
-      }
-    } catch (e) {
-      console.error('✗ Failed to create ImprovementButton:', e);
-    }
-    
+    const buttonClassesMK = [
+      ['calculator', 'CalculatorButton'],
+      ['improvement', 'ImprovementButton']
+    ];
     if (ENABLE_ACHIEVEMENTS) {
+      buttonClassesMK.push(['gamification', 'GamificationButton']);
+    }
+
+    buttonClassesMK.forEach(([keyMK, classNameMK]) => {
       try {
-        if (window.GamificationButton) {
-          buttonInstancesMK.gamification = new window.GamificationButton(...constructorArgsMK);
-          buttonInstancesMK.gamification.create();
+        if (window[classNameMK]) {
+          buttonInstancesMK[keyMK] = new window[classNameMK](buttonManager);
+          buttonInstancesMK[keyMK].create();
+        } else {
+          console.warn('⚠ ' + classNameMK + ' class not available');
         }
       } catch (e) {
-        console.error('✗ Failed to create GamificationButton:', e);
+        console.error('✗ Failed to create ' + classNameMK + ':', e);
       }
-    }
-    
-    setTimeout(() => {
-      try {
-        loadButtonSettings();
-      } catch (error) {
-        console.warn('Failed to load button settings:', error);
-      }
-    }, 1000);
+    });
   }
 
   if (runtimeAPI && runtimeAPI.onMessage) {
     runtimeAPI.onMessage.addListener((message, sender, sendResponse) => {
       try {
         if (message.action === 'toggleButton') {
-          const buttonMK = document.getElementById(message.buttonId);
-          if (buttonMK) {
-            if (message.enabled) {
-              buttonMK.style.display = 'flex';
-            } else {
-              buttonMK.style.display = 'none';
-              const panelIdMK = message.buttonId.replace('-btn', '-panel');
-              const panelMK = document.getElementById(panelIdMK);
-              if (panelMK) {
-                panelMK.style.display = 'none';
-              }
+          // Der Speicher ist die Quelle (PanumDock hört auf Änderungen). Die Nachricht macht es nur sofort sichtbar.
+          const handledMK = window.PanumDock && window.PanumDock.setEnabledByButtonId(message.buttonId, message.enabled);
+          if (!handledMK) {
+            const buttonMK = document.getElementById(message.buttonId);
+            if (buttonMK) {
+              buttonMK.style.display = message.enabled ? 'flex' : 'none';
             }
           }
-          
-          const storageKeyMap = {
-            'gamification-overlay-btn': 'buttonEnabled_achievements',
-            'pluspoints-overlay-btn': 'buttonEnabled_pluspoints',
-            'notenrechner-calc-btn': 'buttonEnabled_calculator',
-            'notenrechner-custom-btn': 'buttonEnabled_custom',
-            'improvement-overlay-btn': 'buttonEnabled_improvement'
-          };
-          
-          const storageKeyMK = storageKeyMap[message.buttonId];
-          if (storageKeyMK) {
-            try {
-              localStorage.setItem(storageKeyMK, message.enabled.toString());
-            } catch (error) {
-              console.warn('Could not sync button setting to localStorage:', error);
-            }
-          }
-          
+
           sendResponse({ success: true });
         } else if (message.action === 'ping') {
           sendResponse({ success: true, loaded: true });
@@ -1122,72 +1058,6 @@
         sendResponse({ success: false, error: error.message });
       }
       return true;
-    });
-  }
-
-  function loadButtonSettings() {
-    try {
-      if (!runtimeAPI?.id) {
-        console.warn('Extension context invalid, skipping button settings');
-        return;
-      }
-    } catch (error) {
-      console.warn('Extension context check failed in loadButtonSettings:', error);
-      return;
-    }
-
-    const buttonSettingsMK = {
-      'pluspoints-overlay-btn': 'buttonEnabled_pluspoints',
-      'notenrechner-calc-btn': 'buttonEnabled_calculator', 
-      'notenrechner-custom-btn': 'buttonEnabled_custom',
-      'improvement-overlay-btn': 'buttonEnabled_improvement',
-      'gamification-overlay-btn': 'buttonEnabled_achievements'
-    };
-
-    const storageKeysMK = Object.values(buttonSettingsMK);
-    
-    if (storage && storage.get) {
-      try {
-        storage.get(storageKeysMK, (result) => {
-          if (runtimeAPI && runtimeAPI.lastError) {
-            console.warn('Storage error:', runtimeAPI.lastError);
-            loadButtonSettingsFromLocalStorage(buttonSettingsMK);
-            return;
-          }
-          
-          Object.entries(buttonSettingsMK).forEach(([buttonId, storageKey]) => {
-            const buttonMK = document.getElementById(buttonId);
-            if (buttonMK) {
-              const defaultValue = true;
-              const isEnabledMK = result[storageKey] !== undefined ? result[storageKey] : defaultValue;
-              buttonMK.style.display = isEnabledMK ? 'flex' : 'none';
-            }
-          });
-        });
-      } catch (error) {
-        console.warn('Error accessing extension storage:', error);
-        loadButtonSettingsFromLocalStorage(buttonSettingsMK);
-      }
-    } else {
-      loadButtonSettingsFromLocalStorage(buttonSettingsMK);
-    }
-  }
-
-  function loadButtonSettingsFromLocalStorage(buttonSettings) {
-    Object.entries(buttonSettings).forEach(([buttonId, storageKey]) => {
-      const buttonMK = document.getElementById(buttonId);
-      if (buttonMK) {
-        try {
-          const storedMK = localStorage.getItem(storageKey);
-          const defaultValue = true;
-          const isEnabledMK = storedMK !== null ? JSON.parse(storedMK) : defaultValue;
-          buttonMK.style.display = isEnabledMK ? 'flex' : 'none';
-        } catch (error) {
-          console.warn(`Error loading setting ${storageKey}:`, error);
-          const defaultValue = true;
-          buttonMK.style.display = defaultValue ? 'flex' : 'none';
-        }
-      }
     });
   }
 

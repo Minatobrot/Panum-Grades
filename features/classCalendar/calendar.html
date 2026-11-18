@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <title>Klassenkalender</title>
+    <link rel="stylesheet" href="calendar.css">
+  </head>
+  <body>
+    <header class="head">
+      <div class="head-title" id="head-title">Klassenkalender</div>
+      <div class="head-sub" id="head-sub">Hausaufgaben und Prüfungen deiner Klasse</div>
+      <button class="head-close" id="close" title="Schliessen" aria-label="Schliessen">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M13 1L1 13M1 1L13 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <main>
+      <div class="card share-banner" id="share-banner">
+        <div class="share-banner-title" id="share-banner-title">Klassenkalender</div>
+        <div id="share-banner-text">Hausaufgaben und Prüfungen für deine Klasse.</div>
+      </div>
+
+      <div class="card notice" id="notice" hidden>
+        <span id="notice-text"></span>
+        <button class="link" id="notice-close">Ok</button>
+      </div>
+
+      <div class="card toolbar">
+        <div class="filters" id="filters">
+          <button class="filter active" data-filter="all">Alle</button>
+          <button class="filter" data-filter="homework"><span class="dot homework"></span>Hausaufgaben</button>
+          <button class="filter" data-filter="exam"><span class="dot exam"></span>Prüfungen</button>
+        </div>
+        <div class="actions">
+          <button class="btn" id="export" title="Als .ics-Datei für Google/Apple Calendar speichern">.ics</button>
+          <button class="btn primary" id="add">Neuer Eintrag</button>
+        </div>
+      </div>
+
+      <div id="list"></div>
+      <div class="toggles">
+        <button class="link" id="toggle-past" hidden></button>
+        <button class="link" id="toggle-deleted" hidden></button>
+      </div>
+
+      <div class="foot">
+        <div id="sync-status">Nur auf diesem Gerät gespeichert.</div>
+        <div class="foot-links">
+          <button class="link" id="connect" hidden>Mit meiner Klasse teilen</button>
+          <button class="link" id="phone" hidden>Handy verbinden</button>
+          <button class="link" id="ics-link" hidden>Kalender abonnieren</button>
+          <button class="link" id="wipe">Meine Daten löschen</button>
+        </div>
+      </div>
+    </main>
+
+    <div class="undo" id="undo" hidden>
+      <span id="undo-text"></span>
+      <button class="link" id="undo-btn">Rückgängig</button>
+    </div>
+
+    <div class="sheet" id="sheet" hidden>
+      <form class="card form" id="form" autocomplete="off">
+        <div class="form-title" id="form-title">Neuer Eintrag</div>
+
+        <div class="types">
+          <label class="type homework"><input type="radio" name="type" value="homework" checked><span>Hausaufgabe</span></label>
+          <label class="type exam"><input type="radio" name="type" value="exam"><span>Prüfung</span></label>
+        </div>
+
+        <label class="field">Titel
+          <input name="title" required maxlength="120" placeholder="z.B. Kapitel 4 lesen">
+        </label>
+
+        <div class="row">
+          <label class="field">Fach
+            <input name="subject" maxlength="40" placeholder="z.B. Mathematik" list="subjects">
+          </label>
+          <label class="field">Datum
+            <input name="date" type="date" required>
+          </label>
+          <label class="field narrow">Zeit
+            <input name="time" type="time">
+          </label>
+        </div>
+        <datalist id="subjects"></datalist>
+
+        <label class="field">Notiz
+          <textarea name="note" rows="3" maxlength="1000"></textarea>
+        </label>
+
+        <div class="authors" id="authors" hidden></div>
+        <button type="button" class="link" id="history-btn" hidden>Verlauf anzeigen</button>
+        <div class="history" id="history" hidden></div>
+
+        <div class="share-note" id="share-note"></div>
+
+        <div class="form-actions">
+          <button type="button" class="btn danger" id="delete" hidden>Löschen</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn" id="cancel">Abbrechen</button>
+          <button type="submit" class="btn primary" id="submit">Speichern</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Muss beantwortet werden, bevor irgendetwas an die Klasse geht -->
+    <div class="sheet" id="share-sheet" hidden>
+      <div class="card form">
+        <div class="form-title" id="share-title">Mit deiner Klasse teilen?</div>
+        <div class="hint"><b>Wenn du teilst:</b></div>
+        <ul class="tour-points">
+          <li id="share-point-class">Alle in deiner Klasse sehen, was du einträgst.</li>
+          <li>Bei jedem Eintrag steht dein Vorname und der erste Buchstabe deines Nachnamens.</li>
+          <li>Du siehst, was die anderen eintragen. Jeder kann Einträge ändern, löschen und zurückholen.</li>
+          <li>Andere Klassen sehen nichts. Noten werden nie geteilt.</li>
+        </ul>
+        <div class="hint">Ohne Teilen bleibt der Kalender nur auf diesem Gerät. Du kannst das später unten im Kalender ändern.</div>
+        <button type="button" class="btn primary wide" id="share-yes">Mit meiner Klasse teilen</button>
+        <button type="button" class="btn wide" id="share-no">Nur für mich nutzen</button>
+      </div>
+    </div>
+
+    <div class="sheet" id="abo-sheet" hidden>
+      <div class="card form">
+        <div class="form-title">Kalender abonnieren</div>
+        <div class="hint">Zeigt Hausaufgaben und Prüfungen der Klasse in deiner Kalender-App. Die App holt Änderungen von selbst, meist mit ein paar Stunden Verzögerung.</div>
+        <a class="btn primary abo" id="abo-google" target="_blank" rel="noopener noreferrer">In Google Calendar öffnen</a>
+        <a class="btn abo" id="abo-webcal" target="_blank" rel="noopener noreferrer">In Kalender-App öffnen (Apple, Outlook)</a>
+        <input id="abo-url" readonly aria-label="Abo-Link">
+        <div class="hint">Wer diesen Link hat, kann den Kalender lesen. Gib ihn nur in der Klasse weiter.</div>
+        <div class="form-actions">
+          <span class="spacer"></span>
+          <button type="button" class="btn" id="abo-copy">Link kopieren</button>
+          <button type="button" class="btn primary" id="abo-close">Fertig</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="phone-sheet" hidden>
+      <div class="card form">
+        <div class="form-title">Handy verbinden</div>
+        <div class="hint" id="phone-hint">Scanne den Code mit der Kamera deines Handys. Er gilt 5 Minuten und nur einmal.</div>
+        <canvas id="qr" width="232" height="232"></canvas>
+        <input id="phone-url" readonly>
+        <div class="hint">Oder auf dem Handy diesen Code eintippen:</div>
+        <div class="pin" id="phone-pin"></div>
+        <div class="form-actions">
+          <span class="spacer"></span>
+          <button type="button" class="btn" id="phone-copy">Link kopieren</button>
+          <button type="button" class="btn primary" id="phone-close">Fertig</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nur auf calendar.panumic.com sichtbar, solange das Handy nicht verbunden ist -->
+    <div class="sheet welcome" id="welcome" hidden>
+      <div class="card form">
+        <div class="form-title">Klassenkalender verbinden</div>
+        <div class="hint">
+          Hier gibt es kein Passwort. Öffne am Computer im Schulnetz die Notenseite, klicke auf den
+          Kalender-Button und dann unten auf <b>Handy verbinden</b>. Scanne den QR-Code mit diesem Handy.
+        </div>
+        <div class="hint">
+          Schon verbunden, aber die App auf dem Home-Bildschirm fragt wieder? Dann tippe hier den
+          8-stelligen Code ein, der unter dem QR-Code steht.
+        </div>
+        <div class="row">
+          <input id="welcome-code" inputmode="numeric" autocomplete="one-time-code" maxlength="9" placeholder="1234 5678" aria-label="Code">
+          <button type="button" class="btn primary" id="welcome-go">Verbinden</button>
+        </div>
+        <div class="hint error" id="welcome-error" hidden></div>
+      </div>
+    </div>
+
+    <script src="../../browser-polyfill.min.js"></script>
+    <script src="../config.js"></script>
+    <script src="../vendor/qrcode.js"></script>
+    <script src="db.js"></script>
+    <script src="scope.js"></script>
+    <script src="../tour.js"></script>
+    <script src="ics.js"></script>
+    <script src="sync.js"></script>
+    <script src="calendar.js"></script>
+  </body>
+</html>

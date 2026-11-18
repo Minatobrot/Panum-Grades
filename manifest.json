@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Panum Grades",
-  "version": "2.0.7",
+  "version": "3.1.4",
   "description": "Berechne Durchschnitt und Zielnoten direkt auf der Schulwebseite Schul-netz.com.",
   "permissions": ["storage"],
   "browser_specific_settings": {
@@ -30,18 +30,27 @@
         "https://schul-netz.com/*"
       ],
       "css": [
-        "themes/dark-theme.css"
+        "themes/dark-theme.css",
+        "themes/panum-ui.css"
       ],
       "js": [
         "browser-polyfill.min.js",
-        "buttons/pluspoints-button.js",
+        "features/dock-layout.js",
+        "features/dock.js",
+        "features/grades.js",
         "buttons/calculator-button.js",
-        "buttons/custom-button.js",
         "buttons/improvement-button.js",
         "buttons/gamification-button.js",
         "buttons/toast-system.js",
         "buttons/incognito-system.js",
-        "content.js"
+        "content.js",
+        "features/pluspoints/inline.js",
+        "buttons/pluspoints-button.js",
+        "features/schulnetz/parse.js",
+        "features/schulnetz/session.js",
+        "features/overlay.js",
+        "features/classCalendar/button.js",
+        "features/exams/button.js"
       ],
       "run_at": "document_start"
     }
@@ -50,12 +59,12 @@
     {
       "resources": [
         "browser-polyfill.min.js",
-        "buttons/pluspoints-button.js",
         "buttons/calculator-button.js",
-        "buttons/custom-button.js",
         "buttons/improvement-button.js",
         "buttons/gamification-button.js",
-        "buttons/incognito-system.js"
+        "buttons/incognito-system.js",
+        "features/classCalendar/calendar.html",
+        "features/exams/exams.html"
       ],
       "matches": [
         "https://www.schul-netz.com/*",

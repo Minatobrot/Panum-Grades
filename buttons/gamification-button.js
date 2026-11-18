@@ -3,7 +3,6 @@
 (function() {
   'use strict';
   
-  console.log('Loading GamificationButton script...');
 
   class GamificationButton {
     constructor(buttonManager) {
@@ -60,13 +59,6 @@
 
     isPanelOpen() {
       return !!document.getElementById(this.panelId);
-    }
-
-    getDefaultPosition() {
-      return {
-        right: 20, // Right edge
-        bottom: 20   // Bottom right
-      };
     }
 
     loadNotenDaten(cb) {
@@ -236,114 +228,23 @@
       return 'sonstige';
     }
 
-    closeAllPanels() {
-      [
-        { id: "notenrechner-calc-panel", btn: document.getElementById("notenrechner-calc-btn") },
-        { id: "notenrechner-custom-panel", btn: document.getElementById("notenrechner-custom-btn") },
-        { id: "pluspoints-overlay-panel", btn: document.getElementById("pluspoints-overlay-btn") },
-        { id: "improvement-overlay-panel", btn: document.getElementById("improvement-overlay-btn") },
-        { id: "gamification-overlay-panel", btn: document.getElementById("gamification-overlay-btn") }
-      ].forEach(({ id, btn }) => {
-        const pMK = document.getElementById(id);
-        if (pMK) pMK.remove();
-        if (btn) {
-          btn.style.outline = "none";
-          btn.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-          btn.style.width = "50px";
-          btn.style.height = "50px";
-        }
-      });
-    }
-
     create() {
-      if (document.getElementById(this.buttonId)) return;
-      
-      const positionMK = this.getDefaultPosition();
-      const buttonMK = document.createElement("button");
-      buttonMK.id = this.buttonId;
-      buttonMK.title = "Achievements";
-      buttonMK.style.cssText = `
-        position: fixed;
-        width: 50px;
-        height: 50px;
-        background: #fff;
-        color: white;
-        border: 1px solid #ffb300;
-        border-radius: 10px;
-        cursor: pointer;
-        z-index: 10000;
-        font-size: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-        display: flex; align-items: center; justify-content: center;
-        right: ${positionMK.right}px; bottom: ${positionMK.bottom}px;
-        overflow: visible;
-        padding: 0;
-        transition: box-shadow 0.25s, outline 0.25s, width 0.25s, height 0.25s;
-      `;
-      buttonMK.innerHTML = `<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="14" fill="#ffb300"/><path d="M9 8h10v3a5 5 0 01-10 0V8z" fill="#fff"/><rect x="12" y="18" width="4" height="4" rx="2" fill="#fff"/></svg>`;
-      
-      this.buttonManager.registerButton(this.buttonId, buttonMK, {});
-      
-      buttonMK.addEventListener("click", (eMK) => {
-        if (this.isPanelOpen()) {
-          const pMK = document.getElementById(this.panelId);
-          if (pMK) pMK.remove();
-          buttonMK.style.outline = "none";
-          buttonMK.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-          buttonMK.style.width = "50px";
-          buttonMK.style.height = "50px";
-          return;
-        }
-        this.closeAllPanels();
-        this.buttonManager.markButtonOpening(this.buttonId);
-        buttonMK.style.outline = "3px solid #ffe082";
-        buttonMK.style.boxShadow = "0 0 16px 4px #ffe082, 0 2px 8px rgba(0,0,0,0.18)";
-        buttonMK.style.width = "58px";
-        buttonMK.style.height = "58px";
-        
-        this.createPanel(buttonMK);
+      const buttonMK = window.PanumDock.add({
+        name: 'achievements',
+        title: 'Achievements',
+        color: '#ffb300',
+        svg: `<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="14" fill="#ffb300"/><path d="M9 8h10v3a5 5 0 01-10 0V8z" fill="#fff"/><rect x="12" y="18" width="4" height="4" rx="2" fill="#fff"/></svg>`,
+        width: 520,
+        height: 580,
+        open: (panelMK) => this.createPanel(panelMK)
       });
-      
-      document.addEventListener("click", (eMK) => {
-        const panelMK = document.getElementById(this.panelId);
-        if (!panelMK && buttonMK.style.outline !== "none") {
-          buttonMK.style.outline = "none";
-          buttonMK.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-          buttonMK.style.width = "50px";
-          buttonMK.style.height = "50px";
-        }
-      }, true);
-      
-      document.body.appendChild(buttonMK);
+      this.buttonManager.registerButton(this.buttonId, buttonMK, {});
     }
 
-    createPanel(buttonMK) {
-      const panelMK = document.createElement("div");
-      panelMK.id = this.panelId;
-      const panelWidthMK = 520, panelHeightMK = 580;
-      const btnLeftMK = parseInt(buttonMK.style.left);
-      const btnTopMK = parseInt(buttonMK.style.top);
-
-      const panelLeft = window.innerWidth - panelWidthMK - 75;
-      const panelTop = window.innerHeight - panelHeightMK - 80;
-      
-      panelMK.style.cssText = `
-        position: fixed;
-        left: ${panelLeft}px;
-        top: ${panelTop}px;
-        width: ${panelWidthMK}px;
-        height: ${panelHeightMK}px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-        z-index: 9999;
-        padding: 0;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-      `;
-      
+    // panelMK kommt von PanumDock (features/dock.js): Position, Grösse und Schliessen sind dort geregelt
+    createPanel(panelMK) {
       const closeBtnMK = document.createElement("button");
+      closeBtnMK.title = "Schliessen";
       closeBtnMK.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L1 13M1 1L13 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
       closeBtnMK.style.cssText = `
         position: absolute;
@@ -354,20 +255,13 @@
         border-radius: 12px;
         width: 32px; height: 32px;
         cursor: pointer;
-        z-index: 10002;
+        z-index: 2;
         display: flex; align-items: center; justify-content: center;
-        transition: all 0.2s ease;
-        backdrop-filter: blur(5px);
+        transition: background 0.15s ease;
       `;
-      closeBtnMK.onmouseover = () => { closeBtnMK.style.background = 'rgba(255, 255, 255, 0.35)'; closeBtnMK.style.transform = 'scale(1.05)'; };
-      closeBtnMK.onmouseout = () => { closeBtnMK.style.background = 'rgba(255, 255, 255, 0.2)'; closeBtnMK.style.transform = 'scale(1)'; };
-      closeBtnMK.onclick = () => {
-        panelMK.remove();
-        buttonMK.style.outline = "none";
-        buttonMK.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-        buttonMK.style.width = "50px";
-        buttonMK.style.height = "50px";
-      };
+      closeBtnMK.onmouseover = () => { closeBtnMK.style.background = 'rgba(255, 255, 255, 0.35)'; };
+      closeBtnMK.onmouseout = () => { closeBtnMK.style.background = 'rgba(255, 255, 255, 0.2)'; };
+      closeBtnMK.onclick = () => window.PanumDock.close('achievements');
       
       const contentMK = document.createElement('div');
       contentMK.style.cssText = 'padding: 0; overflow-y: auto; flex: 1; display: flex; flex-direction: column;';
@@ -441,7 +335,6 @@
       
       panelMK.appendChild(contentMK);
       panelMK.appendChild(closeBtnMK);
-      document.body.appendChild(panelMK);
 
       this.initializeAchievements();
     }
@@ -1575,7 +1468,7 @@
         border-radius: 8px;
         font-size: 14px;
         max-width: 300px;
-        z-index: 10003;
+        z-index: 2147483200;
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.3s ease;
@@ -1831,7 +1724,6 @@
   }
 
   window.GamificationButton = GamificationButton;
-  console.log('✓ GamificationButton class registered on window object');
 
   window.achievementDebug = {
     clearAll: () => {

@@ -3,7 +3,6 @@
 (function() {
   'use strict';
   
-  console.log('Loading ImprovementButton script...');
 
   class ImprovementButton {
     constructor(buttonManager) {
@@ -14,34 +13,6 @@
 
     isPanelOpen() {
       return !!document.getElementById(this.panelId);
-    }
-
-    getDefaultPosition() {
-      return {
-        right: 20, // Right edge
-        bottom: 80   // Above pluspoints button
-      };
-    }
-
-    startWatching() {
-      const myButton = document.getElementById(this.buttonId);
-      if (!myButton) return;
-
-      if (!myButton.dataset.originalBottom) {
-        myButton.dataset.originalBottom = myButton.style.bottom;
-      }
-
-      const checkAndSlide = () => {
-        const myOriginalPos = parseInt(myButton.dataset.originalBottom);
-
-        const targetPosition = myOriginalPos;
-        
-        myButton.style.transition = 'bottom 0.3s ease';
-        myButton.style.bottom = `${targetPosition}px`;
-      };
-
-      checkAndSlide();
-      setInterval(checkAndSlide, 100);
     }
 
     loadNotenDaten(cb) {
@@ -68,117 +39,23 @@
       }
     }
 
-    closeAllPanels() {
-      [
-        { id: "notenrechner-calc-panel", btn: document.getElementById("notenrechner-calc-btn") },
-        { id: "notenrechner-custom-panel", btn: document.getElementById("notenrechner-custom-btn") },
-        { id: "pluspoints-overlay-panel", btn: document.getElementById("pluspoints-overlay-btn") },
-        { id: "improvement-overlay-panel", btn: document.getElementById("improvement-overlay-btn") },
-        { id: "gamification-overlay-panel", btn: document.getElementById("gamification-overlay-btn") },
-        { id: "game-overlay-panel", btn: document.getElementById("game-overlay-btn") }
-      ].forEach(({ id, btn }) => {
-        const p = document.getElementById(id);
-        if (p) p.remove();
-        if (btn) {
-          btn.style.outline = "none";
-          btn.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-          btn.style.width = "50px";
-          btn.style.height = "50px";
-        }
-      });
-    }
-
     create() {
-      if (document.getElementById(this.buttonId)) return;
-      
-      const position = this.getDefaultPosition();
-      const button = document.createElement("button");
-      button.id = this.buttonId;
-      button.title = "Chancen und Risiken";
-      button.style.cssText = `
-        position: fixed;
-        width: 50px;
-        height: 50px;
-        background: #fff;
-        color: white;
-        border: 1px solid #ff5722;
-        border-radius: 10px;
-        cursor: pointer;
-        z-index: 10000;
-        font-size: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-        display: flex; align-items: center; justify-content: center;
-        right: ${position.right}px; bottom: ${position.bottom}px;
-        overflow: visible;
-        padding: 0;
-        transition: box-shadow 0.25s, outline 0.25s, width 0.25s, height 0.25s;
-      `;
-      button.innerHTML = `<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" fill="#ff5722"/><path d="M7 12l4 4 3-3 7-7" stroke="#fff" stroke-width="2" fill="none"/><path d="M7 16l4-4 3 3 7 7" stroke="#fff" stroke-width="2" fill="none"/></svg>`;
-      
-      this.buttonManager.registerButton(this.buttonId, button, {});
-      
-      button.addEventListener("click", (e) => {
-        if (this.isPanelOpen()) {
-          const p = document.getElementById(this.panelId);
-          if (p) p.remove();
-          button.style.outline = "none";
-          button.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-          button.style.width = "50px";
-          button.style.height = "50px";
-          return;
-        }
-        this.closeAllPanels();
-        this.buttonManager.markButtonOpening(this.buttonId);
-        button.style.outline = "3px solid #ff8a65";
-        button.style.boxShadow = "0 0 16px 4px #ff8a65, 0 2px 8px rgba(0,0,0,0.18)";
-        button.style.width = "58px";
-        button.style.height = "58px";
-        
-        this.createPanel(button);
+      const button = window.PanumDock.add({
+        name: 'improvement',
+        title: 'Chancen und Risiken',
+        color: '#ff5722',
+        svg: `<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" fill="#ff5722"/><path d="M7 12l4 4 3-3 7-7" stroke="#fff" stroke-width="2" fill="none"/><path d="M7 16l4-4 3 3 7 7" stroke="#fff" stroke-width="2" fill="none"/></svg>`,
+        width: 420,
+        height: 480,
+        open: (panel) => this.fillPanel(panel)
       });
-      
-      document.addEventListener("click", (e) => {
-        const panel = document.getElementById(this.panelId);
-        if (!panel && button.style.outline !== "none") {
-          button.style.outline = "none";
-          button.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-          button.style.width = "50px";
-          button.style.height = "50px";
-        }
-      }, true);
-      
-      document.body.appendChild(button);
-      
-      this.startWatching();
+      this.buttonManager.registerButton(this.buttonId, button, {});
     }
 
-    createPanel(button) {
-      const panel = document.createElement("div");
-      panel.id = this.panelId;
-      const panelWidth = 420, panelHeight = 480;
-      const btnLeft = parseInt(button.style.left);
-      const btnTop = parseInt(button.style.top);
-
-      const panelLeft = window.innerWidth - panelWidth - 75;
-      const panelTop = window.innerHeight - panelHeight - 80;
-      
-      panel.style.cssText = `
-        position: fixed;
-        left: ${panelLeft}px;
-        top: ${panelTop}px;
-        width: ${panelWidth}px;
-        height: ${panelHeight}px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-        z-index: 9999;
-        padding: 0;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-      `;
-      
+    // panel kommt von PanumDock (features/dock.js): Position, Grösse und Schliessen sind dort geregelt
+    fillPanel(panel) {
       const closeBtn = document.createElement("button");
+      closeBtn.title = "Schliessen";
       closeBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L1 13M1 1L13 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
       closeBtn.style.cssText = `
         position: absolute;
@@ -189,26 +66,19 @@
         border-radius: 12px;
         width: 32px; height: 32px;
         cursor: pointer;
-        z-index: 10002;
+        z-index: 2;
         display: flex; align-items: center; justify-content: center;
-        transition: all 0.2s ease;
-        backdrop-filter: blur(5px);
+        transition: background 0.15s ease;
       `;
-      closeBtn.onmouseover = () => { closeBtn.style.background = 'rgba(255, 255, 255, 0.35)'; closeBtn.style.transform = 'scale(1.05)'; };
-      closeBtn.onmouseout = () => { closeBtn.style.background = 'rgba(255, 255, 255, 0.2)'; closeBtn.style.transform = 'scale(1)'; };
-      closeBtn.onclick = () => {
-        panel.remove();
-        button.style.outline = "none";
-        button.style.boxShadow = "0 2px 8px rgba(0,0,0,0.18)";
-        button.style.width = "50px";
-        button.style.height = "50px";
-      };
+      closeBtn.onmouseover = () => { closeBtn.style.background = 'rgba(255, 255, 255, 0.35)'; };
+      closeBtn.onmouseout = () => { closeBtn.style.background = 'rgba(255, 255, 255, 0.2)'; };
+      closeBtn.onclick = () => window.PanumDock.close('improvement');
       
       const content = document.createElement('div');
       content.style.cssText = 'padding: 0; overflow-y: auto; flex: 1; display: flex; flex-direction: column;';
       content.innerHTML = `
-        <div style="background: linear-gradient(135deg, #ff5722, #e64a19); color: white; padding: 20px 18px 16px 18px; margin: 0;">
-          <div style="font-size: 20px; font-weight: bold; margin-bottom: 6px;">📈 Chancen und Risiken</div>
+        <div style="background: linear-gradient(135deg, #ff5722, #e64a19); color: white; padding: 20px 60px 16px 18px; margin: 0;">
+          <div style="font-size: 20px; font-weight: bold; margin-bottom: 6px;">Chancen und Risiken</div>
           <div style="font-size: 14px; opacity: 0.9;">Erkenne Verbesserungsmöglichkeiten und Gefahren</div>
         </div>
         <div style="padding: 18px; flex: 1;" id="improvement-content"></div>
@@ -216,7 +86,6 @@
       
       panel.appendChild(content);
       panel.appendChild(closeBtn);
-      document.body.appendChild(panel);
 
       this.renderImprovementPanel();
     }
@@ -519,6 +388,5 @@
   }
 
   window.ImprovementButton = ImprovementButton;
-  console.log('✓ ImprovementButton class registered on window object');
 
 })();

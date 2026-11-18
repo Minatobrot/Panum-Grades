@@ -19,3 +19,14 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ```
 **Full License:** https://www.mozilla.org/en-US/MPL/2.0/
+---
+## QR Code Generator for JavaScript
+**Files:**
+- `features/vendor/qrcode.js`
+**Version:** 2.0.4
+**Source:** https://github.com/kazuhikoarase/qrcode-generator
+**License:** MIT
+**Copyright:** (c) 2009 Kazuhiko Arase
+**Description:**
+Zeichnet den QR-Code für "Handy verbinden" im Klassenkalender. Unverändert übernommen.
+**Full License:** https://opensource.org/licenses/MIT

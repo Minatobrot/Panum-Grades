@@ -1,0 +1,23 @@
+/* Baut auf calendar.css auf, nur Kopffarbe und die Übernehmen-Spalte sind anders. */
+
+:root {
+  --head-a: #b34c27;
+  --head-b: #94391a;
+}
+
+.entry { cursor: default; }
+.entry .side { display: flex; align-items: center; padding: 0 10px 0 2px; }
+.entry .side .btn { white-space: nowrap; }
+.entry .state { font-size: 12px; font-weight: 600; color: var(--text-soft); white-space: nowrap; }
+.entry .tag {
+  display: inline-block;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 6px;
+  margin-left: 6px;
+  font-weight: normal;
+  color: var(--text-soft);
+}
+
+.btn:disabled { opacity: 0.5; cursor: default; }
